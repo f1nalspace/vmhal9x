@@ -52,6 +52,7 @@ static const GLfloat black[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
 #define MESA_LIB_SW_NAME "mesa3d.dll"
 #define MESA_LIB_SVGA_NAME "vmwsgl32.dll"
+#define MESA_LIB_QEMU3DFX_NAME "qmfxgl32.dll"
 
 #define OS_WIDTH   320
 #define OS_HEIGHT  240
@@ -71,6 +72,10 @@ static char *MesaLibName()
 			{
 				return MESA_LIB_SVGA_NAME;
 			}
+			if(hda->flags & FB_ACCEL_QEMU3DFX)
+			{
+				return MESA_LIB_QEMU3DFX_NAME;
+			}
 		}
 	}
 
@@ -80,7 +85,9 @@ static char *MesaLibName()
 static mesa3d_entry_t *mesa_entry_ht[MESA_HT_MOD] = {};
 
 #define MESA_API(_n, _t, _p) \
-	mesa->proc.p ## _n = (_n ## _h)mesa->GetProcAddress(#_n); if(!mesa->proc.p ## _n){valid = FALSE; ERR("GetProcAddress fail for %s", #_n); break;}
+	mesa->proc.p ## _n = (_n ## _h)mesa->GetProcAddress(#_n); \
+	if(!mesa->proc.p ## _n){mesa->proc.p ## _n = (_n ## _h)GetProcAddress(mesa->lib, #_n);} \
+	if(!mesa->proc.p ## _n){valid = FALSE; ERR("GetProcAddress fail for %s", #_n); break;}
 
 #define MESA_API_OS(_n, _t, _p) \
 	if(mesa->os){MESA_API(_n, _t, _p)}else{mesa->proc.p ## _n = NULL;}
@@ -3479,8 +3486,8 @@ static void ApplyTextureState(mesa3d_entry_t *entry, mesa3d_ctx_t *ctx, int tmu)
 
 			if(vertex_coords || ts->coordscalc_used > 0)
 			{
+				GL_CHECK(entry->proc.pglDisable(GL_TEXTURE_CUBE_MAP));
 				GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_2D));
-				GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_CUBE_MAP));
 				GL_CHECK(entry->proc.pglBindTexture(GL_TEXTURE_2D, ts->image->gltex));
 				GL_CHECK(entry->proc.pglBindTexture(GL_TEXTURE_CUBE_MAP, 0));	
 				ts->active = TRUE;
@@ -3493,7 +3500,7 @@ static void ApplyTextureState(mesa3d_entry_t *entry, mesa3d_ctx_t *ctx, int tmu)
 
 			if(vertex_coords || ts->coordscalc_used > 0)
 			{
-			GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_2D));
+			GL_CHECK(entry->proc.pglDisable(GL_TEXTURE_2D));
 			GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_CUBE_MAP));
 			GL_CHECK(entry->proc.pglBindTexture(GL_TEXTURE_2D, 0));
 			GL_CHECK(entry->proc.pglBindTexture(GL_TEXTURE_CUBE_MAP, ts->image->gltex));

@@ -42,8 +42,12 @@ DEPS= Makefile config.mk vmhal9x.h mesa3d.h mesa3d_api.h surface.h x86.h memory.
 RUNPATH=$(if $(filter $(OS),Windows_NT),.\,./)
 
 HOST_SUFFIX=
+HOST_CFLAGS=
 ifeq ($(filter $(OS),Windows_NT),Windows_NT)
   HOST_SUFFIX=.exe
+else
+  HOST_SUFFIX=.bin
+  HOST_CFLAGS+=-Dstricmp=strcasecmp
 endif
 
 DLLFLAGS = -o $@ -shared -Wl,--dll,--out-implib,lib$(@:dll=a),--exclude-all-symbols,--exclude-libs=pthread,--disable-dynamicbase,--disable-nxcompat,--subsystem,windows,--image-base,$(BASE_$@)$(TUNE_LD)
@@ -119,7 +123,7 @@ ifdef D3DHAL
 endif
 
 fixlink$(HOST_SUFFIX):
-	$(HOST_CC) -std=$(CSTD) fixlink/fixlink.c -o fixlink$(HOST_SUFFIX)
+	$(HOST_CC) -std=$(CSTD) $(HOST_CFLAGS) fixlink/fixlink.c -o fixlink$(HOST_SUFFIX)
 
 vmdisp9x.dll: $(VMDISP9X_OBJS)
 	$(CC) $(LDFLAGS) $(VMDISP9X_OBJS) vmdisp9x.def $(LIBS) $(DLLFLAGS)

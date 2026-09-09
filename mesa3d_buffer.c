@@ -467,8 +467,16 @@ NUKED_LOCAL void MesaBufferUploadTexture(mesa3d_ctx_t *ctx, mesa3d_texture_t *te
 #endif
 
 	GL_CHECK(entry->proc.pglActiveTexture(GL_TEXTURE0+tmu));
-	GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_CUBE_MAP));
-	GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_2D));
+	if(tex->cube)
+	{
+		GL_CHECK(entry->proc.pglDisable(GL_TEXTURE_2D));
+		GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_CUBE_MAP));
+	}
+	else
+	{
+		GL_CHECK(entry->proc.pglDisable(GL_TEXTURE_CUBE_MAP));
+		GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_2D));
+	}
 
 	if(tex->cube)
 	{
@@ -670,8 +678,16 @@ NUKED_LOCAL void MesaBufferUploadTextureChroma(mesa3d_ctx_t *ctx, mesa3d_texture
 #endif
 
 	GL_CHECK(entry->proc.pglActiveTexture(GL_TEXTURE0+tmu));
-	GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_CUBE_MAP));
-	GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_2D));
+	if(tex->cube)
+	{
+		GL_CHECK(entry->proc.pglDisable(GL_TEXTURE_2D));
+		GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_CUBE_MAP));
+	}
+	else
+	{
+		GL_CHECK(entry->proc.pglDisable(GL_TEXTURE_CUBE_MAP));
+		GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_2D));
+	}
 
 	TOPIC("CHROMA", "MesaBufferUploadTextureChroma - level=%d", level);
 
@@ -894,8 +910,16 @@ NUKED_LOCAL void MesaBufferUploadTexturePalette(mesa3d_ctx_t *ctx, mesa3d_textur
 	DWORD pal_flags = dds->dwPaletteFlags;
 
 	GL_CHECK(entry->proc.pglActiveTexture(GL_TEXTURE0+tmu));
-	GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_CUBE_MAP));
-	GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_2D));
+	if(tex->cube)
+	{
+		GL_CHECK(entry->proc.pglDisable(GL_TEXTURE_2D));
+		GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_CUBE_MAP));
+	}
+	else
+	{
+		GL_CHECK(entry->proc.pglDisable(GL_TEXTURE_CUBE_MAP));
+		GL_CHECK(entry->proc.pglEnable(GL_TEXTURE_2D));
+	}
 
 	DWORD pitch4 = SurfacePitch(w, 32)/4;
 	
